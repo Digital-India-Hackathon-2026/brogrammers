@@ -67,6 +67,14 @@
     f_lineH: 'Line Height', f_adhd: 'ADHD Mode', f_sat: 'Saturation', f_light: 'Light Mode',
     f_dark: 'Dark Mode', f_invert: 'Invert Colors', f_links: 'Highlight Links', f_tts: 'Text-to-Speech',
     f_cursor: 'Cursor', f_pause: 'Pause Animations', f_hideImg: 'Hide Images',
+    // Image compressor
+    compressTip: 'Compress Image', compressTitle: 'Image Compressor',
+    compressUpload: 'Click to upload an image (JPG, PNG…)', compressTo: 'Compress to',
+    compressBtn: 'Compress', downloadBtn: 'Download',
+    compressPick: 'Please choose an image first.', compressBadSize: 'Enter a valid target size.',
+    compressWorking: 'Compressing…', compressFail: "Couldn't read this image — try a JPG or PNG.",
+    compressFrom: 'from', compressSmaller: 'smaller',
+    compressNote: 'This is the smallest we could reach without heavy quality loss.',
   };
   let currentLang = 'en';
   let TR = {};                              // key → translated string for currentLang
@@ -107,6 +115,7 @@
     const ar = panel.querySelector('.civicos-a11y-reset'); if (ar) ar.innerText = t('resetAll');
     A11Y.renderTiles();
     LANG.markActive();
+    COMPRESS.applyLang();
   }
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -288,10 +297,174 @@
     return { buildMenu, markActive, toggle, close };
   })();
 
+  // ══════════════════════════════════════════════════════════════════════════
+  //  IMAGE COMPRESSOR  — 100% local (Canvas). Compresses an uploaded image to a
+  //  user-set target size (KB/MB) for portal upload limits. Nothing leaves the
+  //  machine; no backend call. Output is JPEG (reliable size targeting).
+  // ══════════════════════════════════════════════════════════════════════════
+  const COMPRESS = (() => {
+    let file = null;      // selected File
+    let unit = 'KB';
+    let outBlob = null;   // compressed result
+    let outUrl = null;    // object URL (preview + download)
+
+    const q = (sel) => panel && panel.querySelector(sel);
+
+    function open() {
+      LANG.close(); A11Y.close();
+      const p = q('.civicos-compress-panel');
+      if (p) { p.classList.add('open'); panel.classList.add('compress-open'); }
+    }
+    function close() {
+      const p = q('.civicos-compress-panel');
+      if (p) p.classList.remove('open');
+      if (panel) panel.classList.remove('compress-open');
+    }
+
+    function sizeStr(n) {
+      if (n >= 1024 * 1024) return (n / (1024 * 1024)).toFixed(2) + ' MB';
+      if (n >= 1024) return (n / 1024).toFixed(1) + ' KB';
+      return n + ' B';
+    }
+
+    function resetResult() {
+      if (outUrl) { URL.revokeObjectURL(outUrl); outUrl = null; }
+      outBlob = null;
+      const r = q('.civicos-c-result'); if (r) r.innerHTML = '';
+    }
+
+    function onFile(input) {
+      const f = input.files && input.files[0];
+      if (!f) return;
+      file = f;
+      resetResult();
+      const info = q('.civicos-c-file');
+      if (info) {
+        const url = URL.createObjectURL(f);
+        info.innerHTML = `<img class="civicos-c-thumb" src="${url}" alt=""><div class="civicos-c-fmeta"><b>${escapeHtml(f.name)}</b><span>${sizeStr(f.size)}</span></div>`;
+      }
+    }
+
+    function setUnit(u) {
+      unit = u;
+      panel.querySelectorAll('.civicos-c-unitbtn').forEach((b) =>
+        b.classList.toggle('active', b.getAttribute('data-unit') === u));
+    }
+
+    function targetBytes() {
+      const v = parseFloat(q('.civicos-c-size').value);
+      if (!v || v <= 0) return 0;
+      return Math.round(v * (unit === 'MB' ? 1024 * 1024 : 1024));
+    }
+
+    function canvasToBlob(canvas, type, quality) {
+      return new Promise((res) => canvas.toBlob(res, type, quality));
+    }
+
+    async function encode(bitmap, scale, quality) {
+      const w = Math.max(1, Math.round(bitmap.width * scale));
+      const h = Math.max(1, Math.round(bitmap.height * scale));
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, w, h);   // flatten transparency (PNG → JPG)
+      ctx.drawImage(bitmap, 0, 0, w, h);
+      return canvasToBlob(canvas, 'image/jpeg', quality);
+    }
+
+    // Prefer full resolution at lower quality; downscale only when quality alone
+    // can't reach the target. Returns the largest blob that is still ≤ target
+    // (or the smallest achievable if the target is unreachable).
+    async function compressToTarget(bitmap, target) {
+      const scales = [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.15];
+      let best = null;
+      for (const scale of scales) {
+        const low = await encode(bitmap, scale, 0.3);   // cheapest at this scale
+        if (!best || low.size < best.size) best = low;
+        if (low.size > target) continue;                // can't fit even at min quality → shrink
+        let lo = 0.3, hi = 0.95, fit = low;
+        for (let i = 0; i < 7; i++) {                   // binary-search highest quality under target
+          const mid = (lo + hi) / 2;
+          const blob = await encode(bitmap, scale, mid);
+          if (blob.size <= target) { fit = blob; lo = mid; }
+          else { hi = mid; }
+        }
+        return { blob: fit, reached: true };
+      }
+      return { blob: best, reached: !!(best && best.size <= target) };
+    }
+
+    async function doCompress() {
+      if (!file) { flash(t('compressPick')); return; }
+      const target = targetBytes();
+      if (!target) { flash(t('compressBadSize')); return; }
+      const go = q('.civicos-c-go');
+      const prev = go.innerText; go.disabled = true; go.innerText = t('compressWorking');
+      try {
+        let bitmap;
+        try { bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+        catch (e) { bitmap = await createImageBitmap(file); }
+        const { blob, reached } = await compressToTarget(bitmap, target);
+        if (bitmap.close) bitmap.close();
+        if (!blob) throw new Error('encode failed');
+        resetResult();
+        outBlob = blob; outUrl = URL.createObjectURL(blob);
+        renderResult(reached);
+      } catch (e) {
+        flash(t('compressFail'));
+      } finally {
+        go.disabled = false; go.innerText = prev;
+      }
+    }
+
+    function renderResult(reached) {
+      const r = q('.civicos-c-result');
+      if (!r) return;
+      const pct = file.size ? Math.max(0, Math.round((1 - outBlob.size / file.size) * 100)) : 0;
+      const note = reached ? '' : `<div class="civicos-c-note">${escapeHtml(t('compressNote'))}</div>`;
+      r.innerHTML = `
+        <div class="civicos-c-card">
+          <img class="civicos-c-preview" src="${outUrl}" alt="">
+          <div class="civicos-c-stats">
+            <div class="civicos-c-ok">${sizeStr(outBlob.size)}</div>
+            <div class="civicos-c-sub">${escapeHtml(t('compressFrom'))} ${sizeStr(file.size)} · ${pct}% ${escapeHtml(t('compressSmaller'))}</div>
+            ${note}
+          </div>
+          <button class="civicos-c-download">⬇ ${escapeHtml(t('downloadBtn'))}</button>
+        </div>`;
+      r.querySelector('.civicos-c-download').addEventListener('click', doDownload);
+    }
+
+    function doDownload() {
+      if (!outBlob) return;
+      const base = file && file.name ? file.name.replace(/\.[^.]+$/, '') : 'image';
+      const a = document.createElement('a');
+      a.href = outUrl || URL.createObjectURL(outBlob);
+      a.download = base + '-compressed.jpg';
+      uiRoot.appendChild(a); a.click(); a.remove();
+    }
+
+    function flash(msg) {
+      const r = q('.civicos-c-result');
+      if (r) r.innerHTML = `<div class="civicos-c-warn">${escapeHtml(msg)}</div>`;
+    }
+
+    function applyLang() {
+      const set = (sel, key) => { const el = q(sel); if (el) el.innerText = t(key); };
+      set('.civicos-compress-title', 'compressTitle');
+      set('.civicos-c-uploadtx', 'compressUpload');
+      set('.civicos-c-tolabel', 'compressTo');
+      set('.civicos-c-go', 'compressBtn');
+    }
+
+    return { open, close, onFile, setUnit, doCompress, applyLang };
+  })();
+
   // ── Icons ────────────────────────────────────────────────────────────────
   const ROBOT_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="7" width="16" height="12" rx="3"/><path d="M12 7V4"/><circle cx="12" cy="3" r="1.3" fill="#fff"/><circle cx="9" cy="13" r="1.3" fill="#fff" stroke="none"/><circle cx="15" cy="13" r="1.3" fill="#fff" stroke="none"/><path d="M9.5 16.5h5"/><path d="M4 12H2.5"/><path d="M21.5 12H20"/></svg>`;
   const ACCESS_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="3.7" r="1.7" fill="#fff" stroke="none"/><path d="M4.5 8.3c2.4 1 5 1.3 7.5 1.3s5.1-.3 7.5-1.3"/><path d="M12 9.6V15"/><path d="M12 15l-2.7 5.6"/><path d="M12 15l2.7 5.6"/></svg>`;
   const GLOBE_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18"/></svg>`;
+  const COMPRESS_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M21 15l-4.5-4.5L7 20"/></svg>`;
 
   // ── Inject UI ────────────────────────────────────────────────────────────
   function injectUI() {
@@ -326,6 +499,7 @@
           <p class="cv-subtitle">${escapeHtml(STR.subtitle)}</p>
         </div>
         <div class="civicos-status-dot off"></div>
+        <button class="civicos-hbtn civicos-compress-btn" data-tip="compressTip" aria-label="Compress Image">${COMPRESS_SVG}</button>
         <button class="civicos-hbtn civicos-lang-btn" data-tip="langTip" aria-label="Language">${GLOBE_SVG}</button>
         <button class="civicos-hbtn civicos-reset" data-tip="resetTip" aria-label="New chat">&#8635;</button>
         <button class="civicos-hbtn civicos-close" data-tip="closeTip" aria-label="Close">&times;</button>
@@ -355,6 +529,36 @@
           <div class="civicos-a11y-grid"></div>
           <button class="civicos-a11y-reset">${escapeHtml(STR.resetAll)}</button>
         </div>
+      </div>
+      <div class="civicos-compress-panel">
+        <div class="civicos-a11y-head">
+          <span style="width:24px;height:24px;display:inline-flex">${COMPRESS_SVG}</span>
+          <b class="civicos-compress-title">${escapeHtml(STR.compressTitle)}</b>
+          <button class="civicos-hbtn civicos-compress-close" aria-label="Back">&times;</button>
+        </div>
+        <div class="civicos-compress-scroll">
+          <label class="civicos-drop">
+            <input class="civicos-file" type="file" accept="image/*" hidden>
+            <div class="civicos-drop-ic">🖼️</div>
+            <div class="civicos-drop-tx civicos-c-uploadtx">${escapeHtml(STR.compressUpload)}</div>
+          </label>
+          <div class="civicos-c-file"></div>
+          <div class="civicos-c-label civicos-c-tolabel">${escapeHtml(STR.compressTo)}</div>
+          <div class="civicos-c-presets">
+            <button class="civicos-c-chip" data-kb="100">100 KB</button>
+            <button class="civicos-c-chip" data-kb="150">150 KB</button>
+            <button class="civicos-c-chip" data-kb="250">250 KB</button>
+          </div>
+          <div class="civicos-c-sizerow">
+            <input class="civicos-c-size" type="number" min="1" step="1" inputmode="numeric" placeholder="150">
+            <div class="civicos-c-unit">
+              <button class="civicos-c-unitbtn active" data-unit="KB">KB</button>
+              <button class="civicos-c-unitbtn" data-unit="MB">MB</button>
+            </div>
+          </div>
+          <button class="civicos-c-go">${escapeHtml(STR.compressBtn)}</button>
+          <div class="civicos-c-result"></div>
+        </div>
       </div>`;
     uiRoot.appendChild(panel);
 
@@ -369,7 +573,7 @@
     panel.querySelector('.civicos-reset').addEventListener('click', () => resetChat());
     window.addEventListener('civicos-toggle-overlay', () => panel.classList.toggle('active'));
 
-    panel.querySelector('.civicos-a11y-btn').addEventListener('click', () => A11Y.open());
+    panel.querySelector('.civicos-a11y-btn').addEventListener('click', () => { COMPRESS.close(); A11Y.open(); });
     panel.querySelector('.civicos-a11y-close').addEventListener('click', () => A11Y.close());
     panel.querySelector('.civicos-a11y-reset').addEventListener('click', () => A11Y.resetAll());
     panel.querySelector('.civicos-a11y-grid').addEventListener('click', (e) => {
@@ -379,6 +583,19 @@
     panel.querySelector('.civicos-lang-btn').addEventListener('click', (e) => { e.stopPropagation(); LANG.toggle(); });
     panel.querySelector('.civicos-lang-menu').addEventListener('click', (e) => {
       const it = e.target.closest('[data-lang]'); if (it) setLanguage(it.getAttribute('data-lang'));
+    });
+
+    // Image compressor
+    panel.querySelector('.civicos-compress-btn').addEventListener('click', () => COMPRESS.open());
+    panel.querySelector('.civicos-compress-close').addEventListener('click', () => COMPRESS.close());
+    panel.querySelector('.civicos-file').addEventListener('change', (e) => COMPRESS.onFile(e.target));
+    panel.querySelector('.civicos-c-go').addEventListener('click', () => COMPRESS.doCompress());
+    panel.querySelector('.civicos-c-presets').addEventListener('click', (e) => {
+      const chip = e.target.closest('[data-kb]'); if (!chip) return;
+      panel.querySelector('.civicos-c-size').value = chip.getAttribute('data-kb'); COMPRESS.setUnit('KB');
+    });
+    panel.querySelector('.civicos-c-unit').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-unit]'); if (b) COMPRESS.setUnit(b.getAttribute('data-unit'));
     });
     uiRoot.addEventListener('click', (e) => { if (!e.target.closest('.civicos-lang-btn') && !e.target.closest('.civicos-lang-menu')) LANG.close(); });
 
