@@ -1,0 +1,37 @@
+{
+  "workflow_id": "postmatric_renewal",
+  "title": "Post-Matric Scholarship — Renewal Registration",
+  "category": "Post-Matric",
+  "icon": "🔁",
+  "blurb": "Renew your existing post-matric scholarship for the new academic year.",
+  "domain": "telanganaepass.cgg.gov.in",
+  "external": false,
+  "match_keywords": [
+    "post matric renewal", "postmatric renewal registration", "renew post matric scholarship",
+    "renewal registration post matric", "renew scholarship post matric", "post matric renew",
+    "renewal post matric", "continue post matric scholarship", "renew my scholarship"
+  ],
+  "steps": [
+    {
+      "step_id": "open_postmatric",
+      "target_hint": ["Post Matric Scholarship Services", "Post Matric", "Postmatric", "Post-Matric Scholarship"],
+      "action": "click",
+      "sensitive": false,
+      "narration": "Click 'Post Matric Scholarship Services' to open the post-matric options."
+    },
+    {
+      "step_id": "open_renewal",
+      "target_hint": ["Renewal Registrations for ST", "Postmatric Scholarships For Renewal Registration", "Renewal Registration", "Renewal Registrations"],
+      "action": "click",
+      "sensitive": false,
+      "narration": "Under 'Postmatric Scholarships For Renewal Registration', click the Renewal Registration button. (Not the 'Other State' renewal above it.)"
+    },
+    {
+      "step_id": "fill_and_submit",
+      "target_hint": ["Get Details", "Get Detail", "Submit", "Proceed"],
+      "action": "form",
+      "sensitive": false,
+      "narration": "Log in if prompted, then enter your Previous Application Id and SSC details. Click the highlighted button when done."
+    }
+  ]
+}

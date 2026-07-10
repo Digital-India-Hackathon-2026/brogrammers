@@ -1,0 +1,72 @@
+[
+  {
+    "id": "epass_overview",
+    "topic": "About Telangana ePASS",
+    "workflow_id": "",
+    "keywords": ["what is epass", "telangana epass", "about scholarship portal", "epass telangana", "scholarship portal"],
+    "text": "Telangana ePASS (Electronic Payment and Application System of Scholarships) is the state portal at telanganaepass.cgg.gov.in for SC, ST, BC, EBC, Minority and Disabled (PwD) students to apply for and receive scholarships. It covers Pre-Matric (classes IX-X) and Post-Matric (Intermediate to PG) scholarships. Applications, renewals, status checks and acknowledgement printing are all done online through this portal."
+  },
+  {
+    "id": "postmatric_fresh_info",
+    "topic": "Post-Matric Fresh Registration",
+    "workflow_id": "postmatric_fresh",
+    "keywords": ["post matric fresh", "new post matric scholarship", "fresh pre-registration", "apply post matric"],
+    "text": "For a fresh (new) Post-Matric scholarship, open 'Post Matric Scholarship Services', then click 'Fresh Pre-Registration for All Department'. You will be asked for your SSC Hall Ticket Number, Date of Birth, SSC Pass Year and SSC Pass Type. After entering them, click 'Get Details' to verify your information and continue the application."
+  },
+  {
+    "id": "postmatric_renewal_info",
+    "topic": "Post-Matric Renewal Registration",
+    "workflow_id": "postmatric_renewal",
+    "keywords": ["post matric renewal", "renew scholarship", "renewal registration"],
+    "text": "To renew a Post-Matric scholarship, open 'Post Matric Scholarship Services' and click 'Renewal Registration'. Enter your Previous year Application Id, SSC Pass Type, SSC Hall Ticket No, SSC Pass Year and Applicant Name (as in Aadhaar), then click 'Get Details'. Renewal continues your scholarship for the next academic year."
+  },
+  {
+    "id": "postmatric_status_info",
+    "topic": "Post-Matric Application Status",
+    "workflow_id": "postmatric_status",
+    "keywords": ["application status", "know your application status", "scholarship status", "check status", "renewal status"],
+    "text": "To check your Post-Matric scholarship status, open 'Post Matric Scholarship Services' and click 'Know your Application Status'. Enter your Academic Year and Application Number, then click 'Status' to see whether your application is pending, verified, sanctioned or paid."
+  },
+  {
+    "id": "postmatric_print_info",
+    "topic": "Post-Matric Print Application / Acknowledgement",
+    "workflow_id": "postmatric_print",
+    "keywords": ["print application", "print acknowledgement", "download application"],
+    "text": "To print your Post-Matric application or acknowledgement, open 'Post Matric Scholarship Services' and click 'Print Application/Acknowledgement'. Enter your Previous year Application Id, SSC Pass Type, SSC Hall Ticket No, SSC Pass Year and Applicant Name (as in Aadhaar), then click 'Get Details' to view and print it."
+  },
+  {
+    "id": "prematric_fresh_info",
+    "topic": "Pre-Matric Fresh Registration (SC/ST/PwD)",
+    "workflow_id": "prematric_fresh",
+    "keywords": ["pre matric fresh", "prematric registration", "sc st pwd scholarship", "new pre matric"],
+    "text": "For a fresh Pre-Matric scholarship (SC/ST/PwD students), open 'Pre Matric Scholarship Services' and click 'Registration' under the Fresh Registration section. Fill in Student Particulars, School Particulars, Bank Account Details, Address, Income Certificate details, Caste Certificate details and upload the scanned documents. Click Submit, enter the OTP sent to your mobile, and Submit again to complete registration."
+  },
+  {
+    "id": "prematric_renewal_info",
+    "topic": "Pre-Matric Renewal Registration (SC/ST/PwD)",
+    "workflow_id": "prematric_renewal",
+    "keywords": ["pre matric renewal", "prematric renewal", "renew pre matric"],
+    "text": "To renew a Pre-Matric scholarship, open 'Pre Matric Scholarship Services' and click 'Registration' under the Renewal Registration section. Enter your Previous Application Id and click 'Get Application Status' to continue the renewal and view its status."
+  },
+  {
+    "id": "documents_required",
+    "topic": "Documents Required for ePASS Scholarships",
+    "workflow_id": "",
+    "keywords": ["what documents", "documents needed", "documents required", "certificates needed", "which documents"],
+    "text": "Common documents for ePASS scholarships: Aadhaar card (seeded to your bank account), SSC / 10th Hall Ticket, Income Certificate (issued by MeeSeva), Caste Certificate (for SC/ST/BC/EBC), bank passbook (account in the student's name), latest study certificate / bonafide, and a recent passport-size photograph. Pre-Matric applications also require school particulars and scanned supporting documents. Keep your mobile number handy for OTP verification."
+  },
+  {
+    "id": "aadhaar_seeding_info",
+    "topic": "Aadhaar Seeding for Scholarship Payment",
+    "workflow_id": "aadhaar_seeding",
+    "keywords": ["aadhaar seeding", "aadhar seeding", "bank aadhaar link", "money not received", "npci base"],
+    "text": "Scholarship money is paid to the bank account that is Aadhaar-seeded (linked) via NPCI. If your payment fails, your Aadhaar may not be seeded to the correct bank account. Aadhaar seeding is done on the NPCI website (npci.org.in) under Services > Customer > Bharat Aadhaar Seeding Enabler (BASE) > Aadhaar Seeding/Deseeding, then Submit and verify with OTP."
+  },
+  {
+    "id": "eligibility",
+    "topic": "ePASS Scholarship Eligibility",
+    "workflow_id": "",
+    "keywords": ["eligibility", "am i eligible", "who can apply", "income limit", "can i apply"],
+    "text": "Telangana ePASS scholarships are for students belonging to SC, ST, BC, EBC, Minority and Disabled (PwD) categories who are residents of Telangana, studying in recognised institutions. A valid Income Certificate within the prescribed limit and a Caste Certificate are required. Post-Matric covers Intermediate and above; Pre-Matric covers classes IX-X. Check the current academic year's notification on the portal for exact income limits and last dates."
+  }
+]

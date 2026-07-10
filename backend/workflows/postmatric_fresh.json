@@ -1,0 +1,38 @@
+{
+  "workflow_id": "postmatric_fresh",
+  "title": "Post-Matric Scholarship — Fresh Registration",
+  "category": "Post-Matric",
+  "icon": "🎓",
+  "blurb": "Start a new post-matric scholarship application (Fresh Pre-Registration).",
+  "domain": "telanganaepass.cgg.gov.in",
+  "external": false,
+  "match_keywords": [
+    "post matric fresh", "postmatric fresh registration", "fresh pre-registration",
+    "fresh registration post matric", "apply post matric scholarship", "new post matric scholarship",
+    "apply for post matric scholarship", "post matric new registration", "fresh post matric",
+    "pre registration all department", "apply scholarship post matric"
+  ],
+  "steps": [
+    {
+      "step_id": "open_postmatric",
+      "target_hint": ["Post Matric Scholarship Services", "Post Matric", "Postmatric", "Post-Matric Scholarship"],
+      "action": "click",
+      "sensitive": false,
+      "narration": "Click 'Post Matric Scholarship Services' to open the post-matric options."
+    },
+    {
+      "step_id": "open_fresh_prereg",
+      "target_hint": ["Fresh Pre-Registration for All Department", "Fresh Pre-Registrations for All Department", "Postmatric Scholarships For Fresh Registration", "Fresh Pre-Registration", "PMSPreReg"],
+      "action": "click",
+      "sensitive": false,
+      "narration": "Under 'Postmatric Scholarships For Fresh Registration', click 'Fresh Pre-Registration for All Department'. (Ignore the 'Other State' sections above it.)"
+    },
+    {
+      "step_id": "fill_and_submit",
+      "target_hint": ["Get Details", "Get Detail", "Submit", "Save", "Proceed", "Register"],
+      "action": "form",
+      "sensitive": false,
+      "narration": "Log in if prompted, then enter your SSC Hall Ticket Number, Date of Birth, SSC Pass Year and Pass Type. Click the highlighted button when done to continue your application."
+    }
+  ]
+}

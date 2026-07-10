@@ -1,0 +1,50 @@
+{
+  "workflow_id": "aadhaar_seeding",
+  "title": "Aadhaar Seeding (NPCI BASE)",
+  "category": "Other",
+  "icon": "🏦",
+  "blurb": "Link your Aadhaar to your bank account so scholarship money reaches you.",
+  "domain": "npci.org.in",
+  "external": true,
+  "match_keywords": [
+    "aadhaar seeding", "aadhar seeding", "base", "bank aadhaar seeding", "seed aadhaar",
+    "npci aadhaar", "link aadhaar to bank", "aadhaar bank link", "de-seeding", "deseeding"
+  ],
+  "steps": [
+    {
+      "step_id": "open_npci_services",
+      "target_hint": ["Services"],
+      "action": "click",
+      "sensitive": false,
+      "narration": "Aadhaar Seeding is done on the NPCI website (npci.org.in), not on ePASS. Open npci.org.in and click 'Services'."
+    },
+    {
+      "step_id": "open_customer",
+      "target_hint": ["Customer"],
+      "action": "click",
+      "sensitive": false,
+      "narration": "Click on 'Customer'."
+    },
+    {
+      "step_id": "open_base",
+      "target_hint": ["Bharat Aadhaar Seeding Enabler", "BASE"],
+      "action": "click",
+      "sensitive": false,
+      "narration": "Click on 'Bharat Aadhaar Seeding Enabler (BASE)'."
+    },
+    {
+      "step_id": "choose_seeding",
+      "target_hint": ["Aadhaar Seeding", "Deseeding", "Seeding/Deseeding"],
+      "action": "click",
+      "sensitive": false,
+      "narration": "Choose the 'Aadhaar Seeding / Deseeding' option."
+    },
+    {
+      "step_id": "submit_otp",
+      "target_hint": ["Submit", "OTP"],
+      "action": "submit",
+      "sensitive": true,
+      "narration": "Fill the form, then click Submit and enter the OTP sent to your phone. Please do this OTP step yourself — I won't submit or enter the OTP for you."
+    }
+  ]
+}

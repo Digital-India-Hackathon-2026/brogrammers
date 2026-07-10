@@ -1,0 +1,36 @@
+{
+  "workflow_id": "prematric_renewal_print",
+  "title": "Pre-Matric Scholarship — Print Renewal Application",
+  "category": "Pre-Matric",
+  "icon": "🖨️",
+  "blurb": "Print or download your pre-matric renewal application.",
+  "domain": "telanganaepass.cgg.gov.in",
+  "external": false,
+  "match_keywords": [
+    "print pre matric renewal", "prematric renewal print", "print renewal pre matric application",
+    "download pre matric renewal", "print my renewal application pre matric"
+  ],
+  "steps": [
+    {
+      "step_id": "open_prematric",
+      "target_hint": ["Pre Matric Scholarship Services", "Pre Matric", "Prematric", "Pre-Matric Scholarship"],
+      "action": "click",
+      "sensitive": false,
+      "narration": "Click 'Pre Matric Scholarship Services' to open the pre-matric options."
+    },
+    {
+      "step_id": "open_renewal_print",
+      "target_hint": ["Prematric Scholarships For SC/ST/BC Renewal Registration", "SC/ST/BC Renewal Registration", "Print Application", "Print"],
+      "action": "click",
+      "sensitive": false,
+      "narration": "Under 'Prematric Scholarships For SC/ST/BC Renewal Registration', click 'Print Application'."
+    },
+    {
+      "step_id": "fill_and_print",
+      "target_hint": ["Print", "Get Application", "Submit", "View"],
+      "action": "form",
+      "sensitive": false,
+      "narration": "Select your District, Mandal, School and Academic Year, then click the highlighted button to print your renewal application."
+    }
+  ]
+}

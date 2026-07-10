@@ -1,0 +1,21 @@
+# ── Core web backend ──────────────────────────────────────────────
+fastapi>=0.100.0
+uvicorn[standard]>=0.22.0
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+httpx>=0.24.0            # also used to call Anthropic / Ollama (no vendor SDK needed)
+
+# ── Optional: free-form Q&A retrieval (RAG). App degrades gracefully if absent ──
+sentence-transformers>=2.2.0
+faiss-cpu>=1.7.4
+numpy>=1.24.0
+
+# ── Multilingual translation (Google Translate, no API key). Falls back to
+#    the LLM, then English, if unavailable ──
+deep-translator>=1.11.0
+
+# ── Optional: voice input (Whisper STT). App works fine without it ──
+faster-whisper>=1.0.0
+
+# Note: Anthropic Claude is reached over the plain HTTP API via httpx, so the
+# `anthropic` SDK is NOT required. Set ANTHROPIC_API_KEY to enable it.

@@ -1,0 +1,37 @@
+{
+  "workflow_id": "prematric_renewal",
+  "title": "Pre-Matric Scholarship (SC/ST/PwD) — Renewal Registration",
+  "category": "Pre-Matric",
+  "icon": "🔁",
+  "blurb": "Renew a pre-matric scholarship and view its application status.",
+  "domain": "telanganaepass.cgg.gov.in",
+  "external": false,
+  "match_keywords": [
+    "pre matric renewal", "prematric renewal registration", "renew pre matric scholarship",
+    "pre matric renewal status", "get application status pre matric", "renewal registration pre matric",
+    "renew prematric", "pre matric renew"
+  ],
+  "steps": [
+    {
+      "step_id": "open_prematric",
+      "target_hint": ["Pre Matric Scholarship Services", "Pre Matric", "Prematric", "Pre-Matric Scholarship"],
+      "action": "click",
+      "sensitive": false,
+      "narration": "Click 'Pre Matric Scholarship Services' to open the pre-matric options."
+    },
+    {
+      "step_id": "open_renewal",
+      "target_hint": ["Prematric Scholarships For SC/ST/BC Renewal Registration", "SC/ST/BC Renewal Registration", "Renewal Registration", "Registration"],
+      "action": "click",
+      "sensitive": false,
+      "narration": "Under 'Prematric Scholarships For SC/ST/BC Renewal Registration', click 'Registration'."
+    },
+    {
+      "step_id": "fill_and_check",
+      "target_hint": ["Get Application Status", "Application Status", "Get Status", "Submit"],
+      "action": "form",
+      "sensitive": false,
+      "narration": "Enter your Previous Application Id, then click the highlighted button to view your renewal status."
+    }
+  ]
+}

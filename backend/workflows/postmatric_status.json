@@ -1,0 +1,38 @@
+{
+  "workflow_id": "postmatric_status",
+  "title": "Post-Matric Scholarship — Application Status",
+  "category": "Post-Matric",
+  "icon": "🔎",
+  "blurb": "Check the status of your post-matric scholarship application.",
+  "domain": "telanganaepass.cgg.gov.in",
+  "external": false,
+  "match_keywords": [
+    "post matric status", "postmatric application status", "know your application status",
+    "check post matric status", "scholarship status", "application status", "know status",
+    "check my scholarship status", "renewal status", "my scholarship status", "status of my scholarship",
+    "know my status", "track scholarship", "where is my scholarship"
+  ],
+  "steps": [
+    {
+      "step_id": "open_postmatric",
+      "target_hint": ["Post Matric Scholarship Services", "Post Matric", "Postmatric", "Post-Matric Scholarship"],
+      "action": "click",
+      "sensitive": false,
+      "narration": "Click 'Post Matric Scholarship Services' to open the post-matric options."
+    },
+    {
+      "step_id": "open_status",
+      "target_hint": ["Know your Application Status", "Know Your Application Status", "Application Status", "Postmatric Application Status", "Know your Status"],
+      "action": "click",
+      "sensitive": false,
+      "narration": "Click 'Know your Application Status'."
+    },
+    {
+      "step_id": "fill_and_check",
+      "target_hint": ["Status", "Get Status", "View Status", "Submit", "Go"],
+      "action": "form",
+      "sensitive": false,
+      "narration": "Fill in your Academic Year and Application Number, then click the highlighted 'Status' button to see your result."
+    }
+  ]
+}

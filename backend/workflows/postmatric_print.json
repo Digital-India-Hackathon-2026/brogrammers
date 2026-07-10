@@ -1,0 +1,37 @@
+{
+  "workflow_id": "postmatric_print",
+  "title": "Post-Matric Scholarship — Print Application / Acknowledgement",
+  "category": "Post-Matric",
+  "icon": "🖨️",
+  "blurb": "Print or download your post-matric application / acknowledgement.",
+  "domain": "telanganaepass.cgg.gov.in",
+  "external": false,
+  "match_keywords": [
+    "post matric print", "print application post matric", "print acknowledgement",
+    "print post matric application", "download post matric application", "postmatric print application",
+    "print my application", "download acknowledgement", "print application acknowledgement"
+  ],
+  "steps": [
+    {
+      "step_id": "open_postmatric",
+      "target_hint": ["Post Matric Scholarship Services", "Post Matric", "Postmatric", "Post-Matric Scholarship"],
+      "action": "click",
+      "sensitive": false,
+      "narration": "Click 'Post Matric Scholarship Services' to open the post-matric options."
+    },
+    {
+      "step_id": "open_print",
+      "target_hint": ["Print Application/Acknowledgement", "Print Application", "Postmatric Print Application", "Print Acknowledgement"],
+      "action": "click",
+      "sensitive": false,
+      "narration": "Under 'Postmatric Print Application / Acknowledgement', click 'Print Application/Acknowledgement'."
+    },
+    {
+      "step_id": "fill_and_print",
+      "target_hint": ["Get Details", "Get Detail", "Print", "Submit"],
+      "action": "form",
+      "sensitive": false,
+      "narration": "Enter your Application Id and SSC details, then click the highlighted button to view and print it."
+    }
+  ]
+}

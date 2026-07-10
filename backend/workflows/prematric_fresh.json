@@ -1,0 +1,38 @@
+{
+  "workflow_id": "prematric_fresh",
+  "title": "Pre-Matric Scholarship (SC/ST/PwD) — Fresh Registration",
+  "category": "Pre-Matric",
+  "icon": "📝",
+  "blurb": "Register a new pre-matric scholarship for SC / ST / PwD students.",
+  "domain": "telanganaepass.cgg.gov.in",
+  "external": false,
+  "match_keywords": [
+    "pre matric fresh", "prematric fresh registration", "pre matric registration",
+    "apply pre matric scholarship", "new pre matric scholarship", "sc st pwd fresh registration",
+    "pre matric new registration", "fresh registration pre matric", "prematric registration",
+    "apply for pre matric scholarship"
+  ],
+  "steps": [
+    {
+      "step_id": "open_prematric",
+      "target_hint": ["Pre Matric Scholarship Services", "Pre Matric", "Prematric", "Pre-Matric Scholarship"],
+      "action": "click",
+      "sensitive": false,
+      "narration": "Click 'Pre Matric Scholarship Services' to open the pre-matric options."
+    },
+    {
+      "step_id": "open_registration",
+      "target_hint": ["Prematric Scholarships For SC/ST/PWD Students Fresh Registration", "SC/ST/PWD Students Fresh Registration", "prematricFreshRegistration", "Registration"],
+      "action": "click",
+      "sensitive": false,
+      "narration": "Under 'Prematric Scholarships For SC/ST/PWD Students Fresh Registration', click 'Registration'."
+    },
+    {
+      "step_id": "fill_and_submit",
+      "target_hint": ["Submit", "OTP", "Verify OTP", "Save", "Proceed"],
+      "action": "form",
+      "sensitive": true,
+      "narration": "Log in, then fill every section (Student & School particulars, Bank Account, Address, Income & Caste certificates) and upload the scanned documents. When you click Submit you'll get an OTP — enter the OTP and submit yourself. I never handle OTPs."
+    }
+  ]
+}
