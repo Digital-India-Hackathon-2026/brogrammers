@@ -1,3 +1,6 @@
+// CivicOS AI — toolbar popup (cross-browser: Chrome `chrome` / Firefox `browser`)
+const api = globalThis.browser || globalThis.chrome;
+
 document.addEventListener('DOMContentLoaded', () => {
   const statusEl = document.getElementById('status');
   const metaEl = document.getElementById('meta');
@@ -18,12 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
   document.getElementById('btn-toggle').addEventListener('click', () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (!tabs[0]) return;
-      chrome.scripting.executeScript({
-        target: { tabId: tabs[0].id },
-        func: () => window.dispatchEvent(new CustomEvent('civicos-toggle-overlay'))
-      }).catch(() => {});
-    });
+    // Promise form works on both Chrome (MV3) and Firefox; Promise.resolve()
+    // normalises any namespace that might not return a thenable.
+    Promise.resolve(api.tabs.query({ active: true, currentWindow: true }))
+      .then((tabs) => {
+        if (!tabs || !tabs[0]) return undefined;
+        return api.scripting.executeScript({
+          target: { tabId: tabs[0].id },
+          func: () => window.dispatchEvent(new CustomEvent('civicos-toggle-overlay'))
+        });
+      })
+      .catch(() => {});
   });
 });

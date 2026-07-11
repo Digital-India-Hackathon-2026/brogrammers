@@ -27,14 +27,52 @@
   const LANG_KEY = 'civicos_lang';
   const MAX_HISTORY = 30;
 
+  // ── Cross-browser API namespace (Chrome `chrome` / Firefox `browser`) ──────
+  const api = (typeof globalThis !== 'undefined' && globalThis.browser) ? globalThis.browser : chrome;
+
   // ── Backend relay ────────────────────────────────────────────────────────
+  // Promise form so the response is delivered identically on Chrome and Firefox.
+  // (Both `chrome.runtime.sendMessage(msg)` and `browser.runtime.sendMessage(msg)`
+  // return a Promise. Mixing a *callback* with Firefox's event-page listener that
+  // replies via `return true` + sendResponse is unreliable and silently dropped
+  // the /services, /languages and /translate responses — so nothing rendered.)
   function callBackend(endpoint, method, payload) {
-    return new Promise((resolve) => {
-      chrome.runtime.sendMessage(
-        { type: 'CALL_BACKEND', data: { endpoint, method, payload } },
-        (res) => resolve(res || { success: false, error: 'no response' })
-      );
-    });
+    try {
+      return Promise.resolve(api.runtime.sendMessage({ type: 'CALL_BACKEND', data: { endpoint, method, payload } }))
+        .then((res) => res || { success: false, error: 'no response' })
+        .catch(() => ({ success: false, error: 'no response' }));
+    } catch (e) {
+      return Promise.resolve({ success: false, error: String((e && e.message) || e) });
+    }
+  }
+
+  // ── Resilient session store ───────────────────────────────────────────────
+  // Chrome exposes storage.session to content scripts only after the background
+  // grants access (setAccessLevel); Firefox handles it differently. To keep the
+  // workflow-active flag + chat history working the SAME on both browsers, fall
+  // back to storage.local (then in-memory) whenever session storage is missing
+  // or throws — so navigation continuity + the welcome screen never depend on it.
+  const _memStore = {};
+  function _sessionArea() {
+    try { if (chrome.storage && chrome.storage.session) return chrome.storage.session; } catch (e) {}
+    try { if (chrome.storage && chrome.storage.local) return chrome.storage.local; } catch (e) {}
+    return null;
+  }
+  function sessionGet(keys, cb) {
+    const list = Array.isArray(keys) ? keys : [keys];
+    const area = _sessionArea();
+    try {
+      if (area) { area.get(keys, (r) => cb(r || {})); return; }
+    } catch (e) {}
+    const out = {}; list.forEach((k) => { if (k in _memStore) out[k] = _memStore[k]; }); cb(out);
+  }
+  function sessionSet(obj, cb) {
+    try { Object.assign(_memStore, obj); } catch (e) {}
+    const area = _sessionArea();
+    try {
+      if (area) { area.set(obj, cb); return; }
+    } catch (e) {}
+    if (cb) cb();
   }
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -632,20 +670,22 @@
     chrome.storage.local.get([LANG_KEY], (r) => {
       currentLang = r[LANG_KEY] || 'en';
       A11Y.load(() => {
-        fetchUiTranslations(currentLang, () => {
-          applyUiLanguage();
-          fetchServices(() => {
-            chrome.storage.session.get([WF_ACTIVE_KEY], (w) => {
-              if (w[WF_ACTIVE_KEY]) {
-                restoreHistory((had) => {
-                  if (had) _appendDOM(t('continuing'), 'assistant');
-                  panel.classList.add('active');
-                  triggerAutoStep();
-                });
-              } else {
-                clearHistory();
-                renderWelcome();
-              }
+        // Decide resume-vs-welcome FIRST. If a guide is active, bring the agent
+        // back IMMEDIATELY (open panel + restore history + auto-continue) BEFORE
+        // the translations/services network calls — so a page navigation never
+        // looks like the agent "shut down". The catalog + UI text then load in
+        // the background. This path is now identical on Chrome and Firefox.
+        sessionGet([WF_ACTIVE_KEY], (w) => {
+          const resuming = !!w[WF_ACTIVE_KEY];
+          if (resuming) {
+            restoreHistory((had) => { if (had) _appendDOM(t('continuing'), 'assistant'); });
+            panel.classList.add('active');
+            triggerAutoStep();
+          }
+          fetchUiTranslations(currentLang, () => {
+            applyUiLanguage();
+            fetchServices(() => {
+              if (!resuming) { clearHistory(); renderWelcome(); }
             });
           });
         });
@@ -678,7 +718,7 @@
     removeSpotlight();
     clearHistory();
     lastAutoUrl = '';
-    chrome.storage.session.set({ [WF_ACTIVE_KEY]: false });
+    sessionSet({ [WF_ACTIVE_KEY]: false });
     if (progressEl) progressEl.classList.remove('show');
     sessionId = 'session_' + Math.random().toString(36).slice(2, 14);
     chrome.storage.local.set({ civicos_session_id: sessionId });
@@ -694,16 +734,16 @@
 
   // ── History persistence ───────────────────────────────────────────────────
   function saveMsg(text, type) {
-    chrome.storage.session.get([HISTORY_KEY], (r) => {
+    sessionGet([HISTORY_KEY], (r) => {
       const h = r[HISTORY_KEY] || [];
       h.push({ text, type, ts: Date.now() });
       if (h.length > MAX_HISTORY) h.splice(0, h.length - MAX_HISTORY);
-      chrome.storage.session.set({ [HISTORY_KEY]: h });
+      sessionSet({ [HISTORY_KEY]: h });
     });
   }
-  function clearHistory() { chrome.storage.session.set({ [HISTORY_KEY]: [] }); }
+  function clearHistory() { sessionSet({ [HISTORY_KEY]: [] }); }
   function restoreHistory(done) {
-    chrome.storage.session.get([HISTORY_KEY], (r) => {
+    sessionGet([HISTORY_KEY], (r) => {
       const h = r[HISTORY_KEY] || [];
       if (!h.length) return done(false);
       h.forEach(m => _appendDOM(m.text, m.type));
@@ -802,7 +842,7 @@
     speak(step.narration_text);
 
     const active = !!step.workflow_id && !step.is_final && step.action !== 'complete';
-    chrome.storage.session.set({ [WF_ACTIVE_KEY]: active });
+    sessionSet({ [WF_ACTIVE_KEY]: active });
 
     updateProgress(step);
 
@@ -926,7 +966,7 @@
       if (!sessionId) return;
       const url = window.location.href;
       if (url === lastAutoUrl) return;
-      chrome.storage.session.get([WF_ACTIVE_KEY], (r) => {
+      sessionGet([WF_ACTIVE_KEY], (r) => {
         if (!r[WF_ACTIVE_KEY]) return;
         lastAutoUrl = url;
         removeSpotlight();

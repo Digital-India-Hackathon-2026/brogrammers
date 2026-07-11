@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "CivicOS AI — Telangana ePASS Assistant",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "An AI copilot that guides students step-by-step through the Telangana ePASS scholarship portal by highlighting exactly what to click next.",
   "permissions": [
     "activeTab",
@@ -16,7 +16,8 @@
     "http://localhost/*"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "scripts": ["background.js"]
   },
   "action": {
     "default_popup": "popup/popup.html"
@@ -46,5 +47,11 @@
         "http://localhost/*"
       ]
     }
-  ]
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "civicos-epass@brogrammers",
+      "strict_min_version": "115.0"
+    }
+  }
 }

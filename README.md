@@ -1,6 +1,6 @@
 # CivicOS AI — Telangana ePASS Assistant
 
-A Chrome extension + local FastAPI backend that guides students **step-by-step**
+A **Chrome & Firefox** extension + local FastAPI backend that guides students **step-by-step**
 through the **Telangana ePASS scholarship portal** (`telanganaepass.cgg.gov.in`).
 
 You type what you need (e.g. *"help me check my scholarship status"*) and the
@@ -87,10 +87,29 @@ ollama pull qwen2.5:3b
 
 ### 3. Load the extension
 
+The **same `extension/` folder** runs on both Chrome/Edge and Firefox (Manifest V3).
+
+**Chrome / Edge**
+
 1. Open `chrome://extensions`, enable **Developer mode**.
 2. **Load unpacked** → select the `extension/` folder.
 3. Open **telanganaepass.cgg.gov.in** (or the demo below) and click the floating
    robot button, or the toolbar icon → *Open Assistant Panel*.
+
+> Chrome logs a harmless warning, *"Unrecognized manifest key 'background.scripts'"* —
+> that key is read only by Firefox and ignored by Chrome; the extension still works.
+
+**Firefox**
+
+1. Open `about:debugging#/runtime/this-firefox`.
+2. Click **Load Temporary Add-on…** and select `extension/manifest.json`.
+   (A temporary add-on stays loaded until you restart Firefox.)
+3. Open the ePASS site (or the demo below) and use the assistant the same way.
+
+> Developers can instead run `npx web-ext run --source-dir extension` to launch a
+> fresh Firefox profile with the add-on auto-loaded and hot-reloaded on save.
+> Backend communication targets `http://127.0.0.1:8000` on both browsers, so start
+> the backend first (Section 1).
 
 ## Try it without the real site (local demo)
 
